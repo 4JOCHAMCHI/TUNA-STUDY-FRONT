@@ -3,7 +3,17 @@
   import axios from 'axios';
 
   const seats = ref([]);
+  const fetchRooms = async () => {
+    try {
+      const response = await axios.get('/api/all');
+      seats.value = response.data;
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
 
+  // call fetchRooms when component is mounted
+  onMounted(fetchRooms);
 
   function checkIn() {
     alert('좌석 예약이 완료되었습니다.');
@@ -27,21 +37,10 @@
         <button class="small-button">조회</button>
       </div>
     </section>
-    <section class="section-layout" style="justify-content: space-between">
+    <section class="grid-layout">
       <h1 style="display: none">좌석버튼</h1>
-      <div>
-        <div class="div-layout" style="margin-bottom: 20px;">
-          <button class="seat-button">01</button>
-          <button class="seat-button">02</button>
-          <button class="seat-button selected-seat">03</button>
-          <button class="seat-button unable-seat">04</button>
-        </div>
-        <div class="div-layout">
-          <button class="seat-button unable-seat">05</button>
-          <button class="seat-button">06</button>
-          <button class="seat-button">07</button>
-          <button class="seat-button">08</button>
-        </div>
+      <div v-for="(seat, index) in seats" :key="index" style="margin-bottom: 20px;">
+        <button class="seat-button">{{ seat.roomName }}</button>
       </div>
     </section>
     <section class="section-layout">
