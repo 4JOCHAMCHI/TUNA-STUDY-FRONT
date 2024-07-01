@@ -87,11 +87,16 @@ button:focus-visible {
 }
 
 .selected-seat {
-  background-color: midnightblue;
+  background-color: yellow;
+  color: black;
 }
 
 .unable-seat {
   background-color: grey;
+}
+
+.my-seat {
+  background-color: pink;
 }
 
 .large-button {
