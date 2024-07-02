@@ -97,6 +97,7 @@ button:focus-visible {
 
 .my-seat {
   background-color: pink;
+  color: red;
 }
 
 .large-button {
@@ -136,6 +137,7 @@ button:focus-visible {
   width: 100%;
   display: flex;
   justify-content: space-between;
+  gap: 8px;
 }
 
 .grid-layout {

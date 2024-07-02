@@ -60,7 +60,7 @@
       this.mySeat = member.roomId;
 
     } catch (error) {
-      alert("예약 내역이 존재하지 않습니다.")
+      alert("회원이 아니거나, 혹은 현재 예약 내역이 존재하지 않습니다.")
     }
   };
 
@@ -149,7 +149,6 @@
     <div>
       <h1>TUNA STUDY CAFE</h1>
       <div>{{clock.format('YYYY-MM-DD HH:mm:ss')}}</div>
-      <button @click="openModal">회원가입</button>
     </div>
   </section>
 
@@ -157,7 +156,8 @@
     <h1 style="display: none">전화번호 입력폼</h1>
     <div class="div-layout">
       <input type="text" style="flex-grow: 1; margin-right: 16px;" placeholder="전화번호 입력박스" v-model="phone"/>
-      <button class="small-button" @click="findMemberByPhone()">조회</button>
+      <button class="small-button" @click="findMemberByPhone()">좌석조회</button>
+      <button class="small-button" @click="openModal">회원가입</button>
     </div>
   </section>
 
