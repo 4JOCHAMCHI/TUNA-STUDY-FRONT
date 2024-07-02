@@ -1,16 +1,24 @@
 <script setup>
   import { onMounted, ref } from 'vue';
   import axios from 'axios';
+  import SignUpModal from './SignUpModal.vue';
 
   const seats = ref([]);          // entire seats
   const selectedSeat = ref(null); // selected seats by user
   const reservedSeats = ref([]);  // reserved seats
 
-  const reservation = ref([]);    // reservation object
+  const reservation = ref([]);    // reservation object for check-in/out
 
   const roomId = ref(0);
   const phone = ref("");
   const mySeat = ref(0);
+
+  const isModalVisible = ref(false);
+
+  // 모달 열기 함수
+  const openModal = () => {
+    isModalVisible.value = true;
+  };
 
   // 전체 방 정보 가져오기
   const fetchRooms = async () => {
@@ -79,7 +87,6 @@
 
   // 자리 예약
   async function checkIn(reservationId) {
-
     try {
       const response = await axios.get(`/api/check-in/${reservationId}`);
       reservation.value = response.data;
@@ -87,7 +94,7 @@
       console.error('Error:', error);
     }
 
-    alert(`${reservation.value.roomId}번 좌석 예약이 완료되었습니다.`);
+    alert(`${reservation.value.roomId}번 좌석 예약이 완료되었습니다.\n좌석 이용 시간은 2시간입니다.`);
     window.location.reload();
   }
 
@@ -115,12 +122,13 @@
 </script>
 
 <template>
-    <section class="section-layout">
-    <h1 style="display: none">스터디카페명</h1>
-      <div>
-        <h1>TUNA STUDY CAFE</h1>
-      </div>
-    </section>
+  <section class="section-layout">
+  <h1 style="display: none">스터디카페명</h1>
+    <div>
+      <h1>TUNA STUDY CAFE</h1>
+      <button @click="openModal">회원가입</button>
+    </div>
+  </section>
 
     <section class="section-layout">
       <h1 style="display: none">전화번호 입력폼</h1>
@@ -143,15 +151,17 @@
       </div>
     </section>
 
-    <section class="section-layout">
-      <h1 style="display: none">자리예약/퇴실</h1>
-      <div class="div-layout">
-        <button v-if="mySeat" class="large-button" disabled>자리예약</button>
-        <button v-else class="large-button" @click="reserveSeat()">자리예약</button>
+  <section class="section-layout">
+    <h1 style="display: none">자리예약/퇴실</h1>
+    <div class="div-layout">
+      <button v-if="mySeat" class="large-button" disabled>자리예약</button>
+      <button v-else class="large-button" @click="reserveSeat()">자리예약</button>
 
-        <button class="large-button" @click="cancelSeat()">퇴실</button>
-      </div>
-    </section>
+      <button class="large-button" @click="cancelSeat()">퇴실</button>
+    </div>
+  </section>
+
+  <SignUpModal :isVisible="isModalVisible" @close="isModalVisible = false"/>
 </template>
 
 <style scoped>
