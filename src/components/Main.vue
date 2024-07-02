@@ -1,27 +1,33 @@
 <script setup>
   import { onMounted, ref } from 'vue';
   import axios from 'axios';
+  import dayjs from 'dayjs';
+  import duration from "dayjs/plugin/duration"; // https://day.js.org/docs/en/plugin/duration
   import SignUpModal from './SignUpModal.vue';
+
+  dayjs.extend(duration);
 
   const seats = ref([]);          // entire seats
   const selectedSeat = ref(null); // selected seats by user
-  const reservedSeats = ref([]);  // reserved seats
 
   const reservation = ref([]);    // reservation object for check-in/out
+  const reservationList = ref([]);
 
   const roomId = ref(0);
   const phone = ref("");
   const mySeat = ref(0);
 
+  const clock = ref(dayjs());
+
   const isModalVisible = ref(false);
 
   // 모달 열기 함수
-  const openModal = () => {
+  function openModal() {
     isModalVisible.value = true;
   };
 
   // 전체 방 정보 가져오기
-  const fetchRooms = async () => {
+  async function fetchRooms() {
     try {
       const response = await axios.get('/api/all');
       seats.value = response.data;
@@ -31,11 +37,10 @@
   };
 
   // 사용중인 방 정보 가져오기
-  const findReservedSeat = async () => {
+  async function findReservedSeat() {
     try {
       const response = await axios.get(`/api/seat`);
-      reservedSeats.value = response.data.map(seat => seat.roomId);
-
+      reservationList.value = response.data;
     } catch (error) {
       console.error('Error:', error);
     }
@@ -111,14 +116,31 @@
     window.location.reload();
   }
 
-  async function setSelectedRoomId(roomId) {
+  function setSelectedRoomId(roomId) {
     this.roomId = roomId;
     this.selectedSeat = roomId;
   }
 
+  function getRemainingTime(roomId) {
+    let r = this.reservationList.find(r => r.roomId === roomId);
+
+    if (r == undefined)
+      return "";
+
+    let now = dayjs();
+    let endDate = dayjs(r.endDate);
+    let leftTime = endDate.diff(now, 'seconds');
+
+    // console.log(dayjs("2024-07-03T00:20:00").format('{YYYY} MM-DDTHH:mm:ss'));
+    return dayjs.duration(leftTime, 'seconds').format("HH:mm:ss");
+  }
 
   onMounted(fetchRooms);
   onMounted(findReservedSeat);
+  onMounted(() => {
+    // https://codesandbox.io/s/countdown-timer-in-vue-3-lnxsj2?file=/src/components/ProgressBar.vue:341-361
+    setInterval(() => clock.value = dayjs(), 1000);
+  })
 </script>
 
 <template>
@@ -126,30 +148,34 @@
   <h1 style="display: none">스터디카페명</h1>
     <div>
       <h1>TUNA STUDY CAFE</h1>
+      <div>{{clock.format('YYYY-MM-DD HH:mm:ss')}}</div>
       <button @click="openModal">회원가입</button>
     </div>
   </section>
 
-    <section class="section-layout">
-      <h1 style="display: none">전화번호 입력폼</h1>
-      <div class="div-layout">
-        <input type="text" style="flex-grow: 1; margin-right: 16px;" placeholder="전화번호 입력박스" v-model="phone"/>
-        <button class="small-button" @click="findMemberByPhone()">조회</button>
-      </div>
-    </section>
+  <section class="section-layout">
+    <h1 style="display: none">전화번호 입력폼</h1>
+    <div class="div-layout">
+      <input type="text" style="flex-grow: 1; margin-right: 16px;" placeholder="전화번호 입력박스" v-model="phone"/>
+      <button class="small-button" @click="findMemberByPhone()">조회</button>
+    </div>
+  </section>
 
-    <section class="grid-layout">
-      <h1 style="display: none">좌석버튼</h1>
-      <div v-for="(seat, index) in seats" :key="index" style="margin-bottom: 20px;">
-        <button class="seat-button"
-                :class="{
-                  'selected-seat': selectedSeat === seat.roomId,
-                  'my-seat': mySeat === seat.roomId
-                }"
-                :disabled="reservedSeats.includes(seat.roomId)"
-                @click="setSelectedRoomId(seat.roomId)">{{ seat.roomName }}</button>
-      </div>
-    </section>
+  <section class="grid-layout">
+    <h1 style="display: none">좌석버튼</h1>
+    <div v-for="(seat, index) in seats" :key="index" style="margin-bottom: 20px;">
+      <button class="seat-button"
+              :class="{
+                'selected-seat': selectedSeat === seat.roomId,
+                'my-seat': mySeat === seat.roomId
+              }"
+              :disabled="reservationList.find(r => r.roomId == seat.roomId)"
+              @click="setSelectedRoomId(seat.roomId)">
+        <div>{{ seat.roomName }}</div>
+        <div>{{ getRemainingTime(seat.roomId) }}</div>
+      </button>
+    </div>
+  </section>
 
   <section class="section-layout">
     <h1 style="display: none">자리예약/퇴실</h1>
