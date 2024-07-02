@@ -13,14 +13,18 @@ const phone = ref('');
 const email = ref('');
 
 function closeModal() {
+  name.value = '';
+  phone.value = '';
+  email.value = '';
+
   emit('close');
 };
 
-async function submitForm() {
+async function signUp() {
   try {
     const response = await axios.post('/api/member', {
-      name: name.value,
-      phone: phone.value,
+      memberPhone: phone.value,
+      memberName: name.value,
       email: email.value,
     });
     console.log('회원가입 완료!', response.data);
@@ -33,6 +37,7 @@ async function submitForm() {
 </script>
 
 <template>
+  <transition name="modal">
   <div v-if="isVisible" class="modal-overlay" @click.self="closeModal">
     <section class="modal-content ">
       <h1 style="display: none">회원가입 모달</h1>
@@ -50,11 +55,12 @@ async function submitForm() {
           <input type="text" id="email" v-model="email" required />
         </div>
         <div class="div-layout-modal">
-          <button @click=submitForm()>가입</button>
-          <button type="button" @click="closeModal">닫기</button>
+          <button class="small-button" @click=signUp()>가입</button>
+          <button class="small-button" type="button" @click="closeModal">닫기</button>
         </div>
     </section>
   </div>
+  </transition>
 </template>
 
 <style scoped>
@@ -70,6 +76,9 @@ async function submitForm() {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+
+  transition: opacity 1s;
+
 }
 
 .modal-content {
@@ -90,5 +99,13 @@ async function submitForm() {
   margin-bottom: 8px;
   display: flex;
   justify-content: space-between;
+}
+
+.modal-enter-active, .modal-leave-active {
+  transition: opacity 500ms;
+}
+
+.modal-enter-from, .modal-leave-to /* .modal-leave-active in <2.1.8 */ {
+  opacity: 0;
 }
 </style>
