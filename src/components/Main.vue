@@ -89,14 +89,6 @@
     }
   };
 
-  async function checkSignedMember(phone) {
-    try {
-      const response = await axios.get(`/api/member-check/${phone}`);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
   // 예약 테이블 데이터 수정(퇴실)
   async function cancelSeat() {
     try {
@@ -150,6 +142,10 @@
     let now = dayjs();
     let endDate = dayjs(r.endDate);
     let leftTime = endDate.diff(now, 'seconds');
+
+    if (leftTime <= 0) {
+      findReservedSeat();
+    }
 
     // console.log(dayjs("2024-07-03T00:20:00").format('{YYYY} MM-DDTHH:mm:ss'));
     return dayjs.duration(leftTime, 'seconds').format("HH:mm:ss");
