@@ -60,7 +60,7 @@
       this.mySeat = member.roomId;
 
     } catch (error) {
-      alert("회원이 아니거나, 혹은 현재 예약 내역이 존재하지 않습니다.")
+      alert("현재 예약 내역이 존재하지 않습니다.")
     }
   };
 
@@ -72,7 +72,27 @@
 
       checkIn(reservationId);
     } catch (error) {
-      return alert("전화번호 입력 혹은 좌석 선택이 완료되지 않았습니다.");
+      if (error.response) {
+        // 서버에서 응답한 오류
+        if (error.response.status === 404 && error.response.data.message === "존재하지 않는 회원입니다.") {
+          alert("존재하지 않는 회원입니다. 회원가입을 진행해주세요.");
+        } else if (error.response.status === 400 && error.response.data.message === "유효하지 않은 좌석입니다.") {
+          alert("유효하지 않은 좌석입니다.");
+        } else {
+          alert("전화번호 입력 혹은 좌석 선택이 완료되지 않았습니다.");
+        }
+      } else {
+        // 서버로부터의 응답이 없는 경우
+        alert("서버와의 통신에 문제가 발생했습니다.");
+      }
+      console.error('Error:', error);
+    }
+  };
+
+  async function checkSignedMember(phone) {
+    try {
+      const response = await axios.get(`/api/member-check/${phone}`);
+    } catch (error) {
       console.error('Error:', error);
     }
   };
@@ -148,6 +168,7 @@
   <h1 style="display: none">스터디카페명</h1>
     <div>
       <h1>TUNA STUDY CAFE</h1>
+      <div style="font-weight: bold">TUNA STUDY CAFE는 예약 1회당 2시간 이용할 수 있습니다.</div>
       <div>{{clock.format('YYYY-MM-DD HH:mm:ss')}}</div>
     </div>
   </section>
