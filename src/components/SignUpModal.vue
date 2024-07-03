@@ -8,16 +8,16 @@ const props = defineProps({
 
 const emit = defineEmits(['close']);
 
-const name = ref('');
-const phone = ref('');
-const email = ref('');
+const name = ref(null);
+const phone = ref(null);
+const email = ref(null);
 
 const checkedMember = ref(false);
 
 function closeModal() {
-  name.value = '';
-  phone.value = '';
-  email.value = '';
+  name.value = null;
+  phone.value = null;
+  email.value = null;
   checkedMember.value = false;
 
   emit('close');
@@ -30,10 +30,10 @@ async function signUp() {
       memberName: name.value,
       email: email.value,
     });
-    console.log('회원가입 완료!', response.data);
     alert("환영합니다, 회원가입이 완료되었습니다.");
     closeModal();
   } catch (error) {
+    alert("회원가입에 필요한 정보를 빠짐없이 입력해주세요.");
     console.error('Error:', error);
   }
 };
@@ -49,13 +49,11 @@ async function checkSignedMember(phone) {
     if (response.status == 200) {
       alert("이미 해당 전화번호로 가입된 회원이 존재합니다.");
       checkedMember.value = true;
-      console.log(this.checkedMember);
     }
   } catch(error) {
     if (error.response.status == 404) {
       alert("해당 전화번호로 가입된 회원이 없습니다.\n회원가입을 진행해주세요.");
       checkedMember.value = false;
-      console.log("다시 바꿔 ", this.checkedMember);
     }
     else {
       console.error('Error:', error);
