@@ -8,14 +8,17 @@ const props = defineProps({
 
 const emit = defineEmits(['close']);
 
-const name = ref('');
-const phone = ref('');
-const email = ref('');
+const name = ref(null);
+const phone = ref(null);
+const email = ref(null);
+
+const checkedMember = ref(false);
 
 function closeModal() {
-  name.value = '';
-  phone.value = '';
-  email.value = '';
+  name.value = null;
+  phone.value = null;
+  email.value = null;
+  checkedMember.value = false;
 
   emit('close');
 };
@@ -27,11 +30,34 @@ async function signUp() {
       memberName: name.value,
       email: email.value,
     });
-    console.log('회원가입 완료!', response.data);
     alert("환영합니다, 회원가입이 완료되었습니다.");
     closeModal();
   } catch (error) {
+    alert("회원가입에 필요한 정보를 빠짐없이 입력해주세요.");
     console.error('Error:', error);
+  }
+};
+
+async function checkSignedMember(phone) {
+  if (!this.phone) {
+    return alert('전화번호를 입력해주세요.');
+  }
+
+  try {
+    const response = await axios.get(`/api/member-check/${phone}`);
+
+    if (response.status == 200) {
+      alert("이미 해당 전화번호로 가입된 회원이 존재합니다.");
+      checkedMember.value = true;
+    }
+  } catch(error) {
+    if (error.response.status == 404) {
+      alert("해당 전화번호로 가입된 회원이 없습니다.\n회원가입을 진행해주세요.");
+      checkedMember.value = false;
+    }
+    else {
+      console.error('Error:', error);
+    }
   }
 };
 </script>
@@ -43,19 +69,20 @@ async function signUp() {
       <h1 style="display: none">회원가입 모달</h1>
       <h2>회원가입</h2>
         <div class="div-layout-modal">
-          <label for="name">이름:</label>
+          <label class="modal-label" for="phone">전화번호</label>
+          <input type="text" id="phone" v-model="phone" required />
+          <button class="small-button" @click="checkSignedMember(phone)">조회</button>
+        </div>
+        <div class="div-layout-modal">
+          <label class="modal-label" for="name">이름</label>
           <input type="text" id="name" v-model="name" required />
         </div>
         <div class="div-layout-modal">
-          <label for="phone">전화번호:</label>
-          <input type="text" id="phone" v-model="phone" required />
-        </div>
-        <div class="div-layout-modal">
-          <label for="phone">이메일:</label>
+          <label class="modal-label" for="phone">이메일</label>
           <input type="text" id="email" v-model="email" required />
         </div>
-        <div class="div-layout-modal">
-          <button class="small-button" @click=signUp()>가입</button>
+        <div class="div-layout-modal-button">
+          <button class="small-button" @click=signUp() :disabled="checkedMember">가입</button>
           <button class="small-button" type="button" @click="closeModal">닫기</button>
         </div>
     </section>
@@ -81,6 +108,11 @@ async function signUp() {
 
 }
 
+.modal-label {
+  width: 60px;
+  text-align: left;
+}
+
 .modal-content {
   display: flex;
   flex-direction: column;
@@ -88,17 +120,28 @@ async function signUp() {
   background: grey;
   padding: 20px;
   border-radius: 5px;
-  max-width: 600px;
+  max-width: 500px;
   width: 100%;
 }
 
 .div-layout-modal {
-  padding-left: 20px;
-  padding-right: 20px;
-  width: 240px;
+  /*padding-left: 20px;*/
+  /*padding-right: 20px;*/
+  gap: 20px;
+  width: 350px;
+  height: 32px;
   margin-bottom: 8px;
   display: flex;
-  justify-content: space-between;
+}
+
+.div-layout-modal-button {
+  padding-left: 20px;
+  padding-right: 20px;
+  width: 350px;
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
 }
 
 .modal-enter-active, .modal-leave-active {

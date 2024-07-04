@@ -84,6 +84,10 @@ button:focus-visible {
   height: 80px;
   padding: 10px 10px;
   font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .selected-seat {
@@ -142,6 +146,7 @@ button:focus-visible {
 
 .grid-layout {
   display: grid;
+  place-items: center;
   grid-template-columns: repeat(4, 1fr); /* 4개의 열로 그리드 설정 */
   gap: 10px;
   margin-bottom: 80px;
